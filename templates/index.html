@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>幸运抽奖</title>
+    <style>
+        body {
+            background: linear-gradient(135deg, #fce7f3 0%, #dbeafe 100%);
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        .card {
+            background: white;
+            width: 90%;
+            max-width: 360px;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-header {
+            background: #3b82f6;
+            padding: 20px;
+            text-align: center;
+            color: white;
+        }
+
+        .card-header h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+
+        .card-content {
+            padding: 20px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        .result {
+            display: none;
+            margin: 20px 0;
+            padding: 20px;
+            background: #f8fafc;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .result-number {
+            color: #3b82f6;
+            font-size: 32px;
+            font-weight: bold;
+            font-family: monospace;
+            letter-spacing: 2px;
+        }
+
+        .button {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            background: #3b82f6;
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .button:not([disabled]):hover {
+            transform: translateY(-2px);
+            background: #2563eb;
+        }
+
+        .button[disabled] {
+            background: #93c5fd;
+            cursor: not-allowed;
+        }
+
+        .spinner {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+</head>
+<body>
+    <div class="card">
+        <div class="card-header">
+            <h1>幸运抽奖</h1>
+        </div>
+        
+        <div class="card-content">
+            <div class="subtitle">点击按钮开始抽奖</div>
+
+            <div id="result" class="result" {% if drawn_number %}style="display: block"{% endif %}>
+                <div class="result-number">
+                    {% if drawn_number %}
+                        {{ drawn_number['number']['number'] }}
+                    {% endif %}
+                </div>
+            </div>
+
+            <button id="drawButton" class="button" {% if not is_active or drawn_number %}disabled{% endif %}>
+                <span class="button-text">{% if drawn_number %}已参与{% else %}立即抽奖{% endif %}</span>
+                <div class="spinner"></div>
+            </button>
+        </div>
+    </div>
+
+    <script>
+    document.getElementById('drawButton').onclick = async function() {
+        if (this.disabled) return;
+        
+        const buttonText = this.querySelector('.button-text');
+        const spinner = this.querySelector('.spinner');
+        const result = document.getElementById('result');
+        const resultNumber = result.querySelector('.result-number');
+        
+        try {
+            this.disabled = true;
+            buttonText.style.display = 'none';
+            spinner.style.display = 'block';
+            
+            const res = await fetch('/draw', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+            
+            const data = await res.json();
+            
+            if (data.success) {
+                confetti({
+                    particleCount: 100,
+                    spread: 70,
+                    origin: { y: 0.6 }
+                });
+                
+                result.style.display = 'block';
+                resultNumber.textContent = data.number;
+                buttonText.textContent = '已参与';
+                this.disabled = true;
+            } else {
+                alert(data.message);
+                this.disabled = false;
+                buttonText.textContent = '立即抽奖';
+            }
+        } catch (error) {
+            alert('抽奖失败，请稍后重试');
+            this.disabled = false;
+            buttonText.textContent = '立即抽奖';
+        } finally {
+            buttonText.style.display = 'block';
+            spinner.style.display = 'none';
+        }
+    };
+    </script>
+</body>
+</html> 
