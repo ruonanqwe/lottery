@@ -2,7 +2,7 @@
 <html>
 <head>
     <title>抽奖系统管理</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="/static/style.css">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 </head>
 <body class="admin-body">
@@ -13,20 +13,15 @@
                 <p class="header-subtitle">管理和监控抽奖活动</p>
             </div>
             <div class="admin-controls">
-                <form method="POST" action="{{ url_for('toggle_lottery') }}" style="display: inline;">
-                    <button type="submit" class="admin-button {% if is_active %}stop{% else %}start{% endif %}">
-                        <span class="material-icons">{% if is_active %}pause{% else %}play_arrow{% endif %}</span>
-                        <span>{% if is_active %}停止抽奖{% else %}开始抽奖{% endif %}</span>
-                    </button>
-                </form>
+                <button id="toggleButton" class="admin-button start">
+                    <span class="material-icons">play_arrow</span>
+                    <span>开始抽奖</span>
+                </button>
                 
-                <form method="POST" action="{{ url_for('reset_lottery') }}" style="display: inline;" 
-                      onsubmit="return confirm('确定要重置抽奖系统吗？这将清空所有记录！');">
-                    <button type="submit" class="admin-button reset">
-                        <span class="material-icons">restart_alt</span>
-                        <span>重置系统</span>
-                    </button>
-                </form>
+                <button id="resetButton" class="admin-button reset">
+                    <span class="material-icons">restart_alt</span>
+                    <span>重置系统</span>
+                </button>
             </div>
         </div>
 
@@ -36,7 +31,7 @@
                     <span class="material-icons">format_list_numbered</span>
                 </div>
                 <div class="stat-info">
-                    <div class="stat-value">{{ total_numbers }}</div>
+                    <div class="stat-value" id="totalNumbers">0</div>
                     <div class="stat-title">号码库总数</div>
                 </div>
             </div>
@@ -46,7 +41,7 @@
                     <span class="material-icons">done_all</span>
                 </div>
                 <div class="stat-info">
-                    <div class="stat-value highlight">{{ total_numbers - remaining_count }}</div>
+                    <div class="stat-value highlight" id="drawnCount">0</div>
                     <div class="stat-title">已抽取数量</div>
                 </div>
             </div>
@@ -56,7 +51,7 @@
                     <span class="material-icons">pending</span>
                 </div>
                 <div class="stat-info">
-                    <div class="stat-value">{{ remaining_count }}</div>
+                    <div class="stat-value" id="remainingCount">0</div>
                     <div class="stat-title">剩余数量</div>
                 </div>
             </div>
@@ -66,7 +61,7 @@
                     <span class="material-icons">percent</span>
                 </div>
                 <div class="stat-info">
-                    <div class="stat-value">{{ ((total_numbers - remaining_count) / total_numbers * 100)|round(1) }}%</div>
+                    <div class="stat-value" id="percentage">0%</div>
                     <div class="stat-title">已抽取比例</div>
                 </div>
             </div>
@@ -78,7 +73,7 @@
                     <span class="material-icons">history</span>
                     抽奖记录
                 </h2>
-                <div class="records-count">共 {{ total_numbers - remaining_count }} 条记录</div>
+                <div class="records-count">共 <span id="recordCount">0</span> 条记录</div>
             </div>
             
             <div class="table-container">
@@ -91,19 +86,17 @@
                             <th>抽取时间</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        {% for number in drawn_numbers %}
-                        <tr>
-                            <td>{{ loop.index }}</td>
-                            <td class="number-cell">{{ number['number'] }}</td>
-                            <td>{{ number['drawn_by_ip'] }}</td>
-                            <td>{{ number['drawn_at'] }}</td>
-                        </tr>
-                        {% endfor %}
+                    <tbody id="recordsTable">
+                        <!-- 记录将通过 JavaScript 动态添加 -->
                     </tbody>
                 </table>
             </div>
         </div>
     </div>
+
+    <script>
+    // 这里添加管理页面的 JavaScript 代码
+    // 包括数据更新、状态切换等功能
+    </script>
 </body>
 </html> 
